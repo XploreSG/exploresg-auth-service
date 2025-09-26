@@ -1,0 +1,56 @@
+# =============================================================================
+# PostgreSQL Docker Compose for ExploreSG Auth Service
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: exploresg-auth-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: exploresg_auth
+      POSTGRES_USER: exploresg_user
+      POSTGRES_PASSWORD: exploresg_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - exploresg-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U exploresg_user -d exploresg_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: exploresg-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@exploresg.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - exploresg-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  exploresg-network:
+    driver: bridge
