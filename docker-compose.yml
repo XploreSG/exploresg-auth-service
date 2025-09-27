@@ -1,22 +1,36 @@
 version: "3.8"
+
 services:
   db:
     image: postgres:15
+    container_name: exploresg-auth-db
     environment:
-      POSTGRES_DB: exploresg
+      POSTGRES_DB: exploresg-auth-service-db
       POSTGRES_USER: exploresguser
       POSTGRES_PASSWORD: exploresgpass
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U exploresguser -d exploresg-auth-service-db",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
+    container_name: exploresg-auth-app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/exploresg
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/exploresg-auth-service-db
       SPRING_DATASOURCE_USERNAME: exploresguser
       SPRING_DATASOURCE_PASSWORD: exploresgpass
     ports:
