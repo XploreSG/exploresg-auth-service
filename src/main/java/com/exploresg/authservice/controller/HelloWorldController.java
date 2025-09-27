@@ -23,6 +23,6 @@ public class HelloWorldController {
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
-                "service", "exploresg-user-service"));
+                "service", "exploresg-auth-service"));
     }
 }
