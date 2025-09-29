@@ -1,7 +1,6 @@
 package com.exploresg.authservice.controller;
 
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
