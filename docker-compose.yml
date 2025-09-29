@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
   db:
     image: postgres:15
-    container_name: exploresg-auth-db
+    container_name: dev-exploresg-auth-db
     environment:
       POSTGRES_DB: exploresg-auth-service-db
       POSTGRES_USER: exploresguser
@@ -23,9 +21,11 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    build: .
-    container_name: exploresg-auth-app
+  backend-auth-dev:
+    build:
+      context: .
+    image: exploresg-auth-backend:dev
+    container_name: dev-exploresg-auth-service
     depends_on:
       db:
         condition: service_healthy
