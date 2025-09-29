@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.exploresg</groupId>
-	<artifactId>auth-service </artifactId>
+	<artifactId>auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>exploresg-auth-service </name>
+	<name>exploresg-auth-service</name>
 	<description>Authentication microservice for ExploreSG platform</description>
 	<url/>
 	<licenses>
@@ -85,6 +85,11 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		
 	</dependencies>
 
