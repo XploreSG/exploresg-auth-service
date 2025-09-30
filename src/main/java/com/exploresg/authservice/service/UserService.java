@@ -1,11 +1,11 @@
 package com.exploresg.authservice.service;
 
 import org.springframework.stereotype.Service;
-
 import com.exploresg.authservice.model.User;
 import com.exploresg.authservice.repository.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +20,36 @@ public class UserService {
         String picture = jwt.getClaim("picture");
         String sub = jwt.getSubject();
 
+        LocalDateTime now = LocalDateTime.now();
+
         return userRepository.findByEmail(email)
                 .map(existing -> {
-                    // Optionally update other fields if changed
+                    // Optionally update other fields if they've changed
+                    boolean updated = false;
+                    if (!name.equals(existing.getName())) {
+                        existing.setName(name);
+                        updated = true;
+                    }
+                    if (!givenName.equals(existing.getGivenName())) {
+                        existing.setGivenName(givenName);
+                        updated = true;
+                    }
+                    if (!familyName.equals(existing.getFamilyName())) {
+                        existing.setFamilyName(familyName);
+                        updated = true;
+                    }
+                    if (picture != null && !picture.equals(existing.getPicture())) {
+                        existing.setPicture(picture);
+                        updated = true;
+                    }
+                    if (!sub.equals(existing.getGoogleSub())) {
+                        existing.setGoogleSub(sub);
+                        updated = true;
+                    }
+                    if (updated) {
+                        existing.setUpdatedAt(now); // Optional: Audit
+                        userRepository.save(existing);
+                    }
                     return existing;
                 })
                 .orElseGet(() -> userRepository.save(
@@ -33,6 +60,9 @@ public class UserService {
                                 .familyName(familyName)
                                 .picture(picture)
                                 .googleSub(sub)
+                                .isActive(true)
+                                .createdAt(now)
+                                .updatedAt(now)
                                 .build()));
     }
 }

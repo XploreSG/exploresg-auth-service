@@ -1,6 +1,13 @@
 package com.exploresg.authservice.model;
 
 import lombok.Data;
+
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,10 +28,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String email;
+
     private String name;
     private String givenName;
     private String familyName;
     private String picture;
-    private String googleSub; // store Google user "sub"
+    @Column(unique = true)
+    private String googleSub; // SSO Subject ID from Google
+
+    // Add these for best practice:
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isActive = true;
+
+    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
