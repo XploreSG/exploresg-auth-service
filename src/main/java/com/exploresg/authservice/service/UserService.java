@@ -1,6 +1,9 @@
 package com.exploresg.authservice.service;
 
 import org.springframework.stereotype.Service;
+
+import com.exploresg.authservice.model.IdentityProvider;
+import com.exploresg.authservice.model.Role;
 import com.exploresg.authservice.model.User;
 import com.exploresg.authservice.repository.UserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -61,6 +64,8 @@ public class UserService {
                                 .picture(picture)
                                 .googleSub(sub)
                                 .isActive(true)
+                                .role(Role.USER)
+                                .identityProvider(IdentityProvider.GOOGLE)
                                 .createdAt(now)
                                 .updatedAt(now)
                                 .build()));

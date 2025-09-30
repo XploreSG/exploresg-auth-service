@@ -9,6 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +37,7 @@ public class User {
     private String givenName;
     private String familyName;
     private String picture;
+
     @Column(unique = true)
     private String googleSub; // SSO Subject ID from Google
 
@@ -42,6 +45,14 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private IdentityProvider identityProvider;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
