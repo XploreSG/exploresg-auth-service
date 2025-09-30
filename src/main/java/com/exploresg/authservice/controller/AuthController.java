@@ -6,10 +6,20 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.exploresg.authservice.model.User;
+import com.exploresg.authservice.service.UserService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
+@RequiredArgsConstructor
 public class AuthController {
+
+    private final UserService userService;
+
     @PostMapping("/api/auth/log-token")
     public ResponseEntity<?> logToken(@RequestHeader("Authorization") String authHeader) {
         // Remove "Bearer " prefix if present
@@ -19,13 +29,19 @@ public class AuthController {
         return ResponseEntity.ok("Token logged successfully");
     }
 
+    // @GetMapping("/me")
+    // public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
+    // String email = jwt.getClaim("email");
+    // String sub = jwt.getSubject();
+    // System.err.println("SSO email: " + email + " google sub: " + sub);
+
+    // return ResponseEntity.ok(
+    // java.util.Map.of("email", email, "sub", sub, "jwt", jwt.getTokenValue()));
+    // }
+
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-        String email = jwt.getClaim("email");
-        String sub = jwt.getSubject();
-        System.err.println("SSO email: " + email + " google sub: " + sub);
-
-        return ResponseEntity.ok(
-                java.util.Map.of("email", email, "sub", sub, "jwt", jwt.getTokenValue()));
+        User user = userService.upsertUserFromJwt(jwt);
+        return ResponseEntity.ok(user);
     }
 }
