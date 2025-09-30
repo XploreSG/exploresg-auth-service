@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - xpl-auth-pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test:
@@ -38,4 +38,4 @@ services:
     restart: on-failure
 
 volumes:
-  pgdata:
+  xpl-auth-pgdata:
