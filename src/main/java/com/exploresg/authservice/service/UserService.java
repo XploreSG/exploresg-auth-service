@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 public class UserService {
     private final UserRepository userRepository;
 
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
     public User upsertUserFromJwt(Jwt jwt) {
         String email = jwt.getClaim("email");
         String name = jwt.getClaim("name");

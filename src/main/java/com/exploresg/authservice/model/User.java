@@ -11,7 +11,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "app_user")
+@Table(name = "app_user", indexes = {
+        @Index(name = "idx_user_email", columnList = "email", unique = true)
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

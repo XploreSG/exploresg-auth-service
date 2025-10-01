@@ -1,6 +1,9 @@
 package com.exploresg.authservice.controller;
 
 import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class AuthController {
 
     private final UserService userService;
+
+    @GetMapping("/check")
+    public ResponseEntity<?> checkUser(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        String email = jwt.getClaim("email");
+        if (email == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No email in token"));
+        }
+
+        boolean exists = userService.existsByEmail(email);
+
+        return ResponseEntity.ok(Map.of(
+                "exists", exists,
+                "email", email));
+    }
 
     @PostMapping("/auth/log-token")
     public ResponseEntity<?> logToken(@RequestHeader("Authorization") String authHeader) {
