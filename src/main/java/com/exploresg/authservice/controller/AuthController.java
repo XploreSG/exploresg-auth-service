@@ -7,13 +7,18 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.exploresg.authservice.dto.SignupProfileRequest;
+import com.exploresg.authservice.dto.SignupResponse;
 import com.exploresg.authservice.model.User;
+import com.exploresg.authservice.model.UserProfile;
 import com.exploresg.authservice.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,19 +57,34 @@ public class AuthController {
         return ResponseEntity.ok("Token logged successfully");
     }
 
-    // @GetMapping("/me")
-    // public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-    // String email = jwt.getClaim("email");
-    // String sub = jwt.getSubject();
-    // System.err.println("SSO email: " + email + " google sub: " + sub);
-
-    // return ResponseEntity.ok(
-    // java.util.Map.of("email", email, "sub", sub, "jwt", jwt.getTokenValue()));
-    // }
-
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
         User user = userService.upsertUserFromJwt(jwt);
         return ResponseEntity.ok(user);
     }
+
+    @PostMapping("/signup")
+    public ResponseEntity<SignupResponse> signupProfile(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody SignupProfileRequest request) {
+
+        User user = userService.upsertUserFromJwt(jwt);
+        UserProfile profile = userService.createOrUpdateProfile(user.getId(), request);
+
+        SignupResponse response = new SignupResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getGivenName(),
+                user.getFamilyName(),
+                user.getPicture(),
+                profile.getPhone(),
+                profile.getDateOfBirth(),
+                profile.getDrivingLicenseNumber(),
+                profile.getPassportNumber(),
+                profile.getPreferredLanguage(),
+                profile.getCountryOfResidence());
+
+        return ResponseEntity.ok(response);
+    }
+
 }
