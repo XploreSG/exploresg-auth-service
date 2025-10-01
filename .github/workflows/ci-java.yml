@@ -142,17 +142,17 @@ jobs:
                     -DoutputDirectory=dependency-check-report || true
             - name: Log HIGH/CRITICAL Vulnerabilities (report-only)
               run: |
-                echo "Scanning dependency-check report for HIGH or CRITICAL vulnerabilities..."
-                if [ -f dependency-check-report/dependency-check-report.xml ]; then
-                  if grep -i -E "critical|high" dependency-check-report/dependency-check-report.xml >/dev/null 2>&1; then
-                    echo "⚠️ Found HIGH or CRITICAL vulnerabilities in dependency-check report"
-                    grep -i -n -E "critical|high" dependency-check-report/dependency-check-report.xml || true
+                  echo "Scanning dependency-check report for HIGH or CRITICAL vulnerabilities..."
+                  if [ -f dependency-check-report/dependency-check-report.xml ]; then
+                    if grep -i -E "critical|high" dependency-check-report/dependency-check-report.xml >/dev/null 2>&1; then
+                      echo "⚠️ Found HIGH or CRITICAL vulnerabilities in dependency-check report"
+                      grep -i -n -E "critical|high" dependency-check-report/dependency-check-report.xml || true
+                    else
+                      echo "✅ No HIGH/CRITICAL vulnerabilities found"
+                    fi
                   else
-                    echo "✅ No HIGH/CRITICAL vulnerabilities found"
+                    echo "ℹ️ dependency-check XML report not found; skipping severity scan"
                   fi
-                else
-                  echo "ℹ️ dependency-check XML report not found; skipping severity scan"
-                fi
             - name: Upload OWASP Report
               uses: actions/upload-artifact@v4
               with:
