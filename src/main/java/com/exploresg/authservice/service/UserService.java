@@ -11,10 +11,11 @@ import com.exploresg.authservice.repository.UserProfileRepository;
 import com.exploresg.authservice.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
-
 import org.springframework.security.oauth2.jwt.Jwt;
 import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,11 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public User upsertUserFromJwt(Jwt jwt) {
+    /**
+     * Creates or updates a user from a Google JWT.
+     * Role is assigned only when the user is first created.
+     */
+    public User upsertUserFromJwt(Jwt jwt, Role requestedRole) {
         String email = jwt.getClaim("email");
         String name = jwt.getClaim("name");
         String givenName = jwt.getClaim("given_name");
@@ -38,48 +43,52 @@ public class UserService {
 
         return userRepository.findByEmail(email)
                 .map(existing -> {
-                    // Optionally update other fields if they've changed
+                    // Update other fields but NOT the role
                     boolean updated = false;
-                    if (!name.equals(existing.getName())) {
+                    if (!Objects.equals(name, existing.getName())) {
                         existing.setName(name);
                         updated = true;
                     }
-                    if (!givenName.equals(existing.getGivenName())) {
+                    if (!Objects.equals(givenName, existing.getGivenName())) {
                         existing.setGivenName(givenName);
                         updated = true;
                     }
-                    if (!familyName.equals(existing.getFamilyName())) {
+                    if (!Objects.equals(familyName, existing.getFamilyName())) {
                         existing.setFamilyName(familyName);
                         updated = true;
                     }
-                    if (picture != null && !picture.equals(existing.getPicture())) {
+                    if (picture != null && !Objects.equals(picture, existing.getPicture())) {
                         existing.setPicture(picture);
                         updated = true;
                     }
-                    if (!sub.equals(existing.getGoogleSub())) {
+                    if (!Objects.equals(sub, existing.getGoogleSub())) {
                         existing.setGoogleSub(sub);
                         updated = true;
                     }
                     if (updated) {
-                        existing.setUpdatedAt(now); // Optional: Audit
+                        existing.setUpdatedAt(now);
                         userRepository.save(existing);
                     }
                     return existing;
                 })
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .email(email)
-                                .name(name)
-                                .givenName(givenName)
-                                .familyName(familyName)
-                                .picture(picture)
-                                .googleSub(sub)
-                                .isActive(true)
-                                .role(Role.USER)
-                                .identityProvider(IdentityProvider.GOOGLE)
-                                .createdAt(now)
-                                .updatedAt(now)
-                                .build()));
+                .orElseGet(() -> {
+                    // Role is only set on first creation
+                    Role finalRole = (requestedRole != null) ? requestedRole : Role.USER;
+                    return userRepository.save(
+                            User.builder()
+                                    .email(email)
+                                    .name(name)
+                                    .givenName(givenName)
+                                    .familyName(familyName)
+                                    .picture(picture)
+                                    .googleSub(sub)
+                                    .isActive(true)
+                                    .role(finalRole)
+                                    .identityProvider(IdentityProvider.GOOGLE)
+                                    .createdAt(now)
+                                    .updatedAt(now)
+                                    .build());
+                });
     }
 
     @Transactional
@@ -87,20 +96,22 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // --- Optional name overrides (signup form can override Google claims) ---
+        // --- Optional name overrides ---
         boolean updatedUser = false;
         if (req.getGivenName() != null && !req.getGivenName().isBlank()
-                && !req.getGivenName().equals(user.getGivenName())) {
+                && !Objects.equals(req.getGivenName(), user.getGivenName())) {
             user.setGivenName(req.getGivenName());
             updatedUser = true;
         }
         if (req.getFamilyName() != null && !req.getFamilyName().isBlank()
-                && !req.getFamilyName().equals(user.getFamilyName())) {
+                && !Objects.equals(req.getFamilyName(), user.getFamilyName())) {
             user.setFamilyName(req.getFamilyName());
             updatedUser = true;
         }
         if (updatedUser) {
-            user.setName(user.getGivenName() + " " + user.getFamilyName());
+            String fullName = ((user.getGivenName() != null ? user.getGivenName() : "") + " " +
+                    (user.getFamilyName() != null ? user.getFamilyName() : "")).trim();
+            user.setName(fullName);
             userRepository.save(user);
         }
 
@@ -126,5 +137,4 @@ public class UserService {
                                 .countryOfResidence(req.getCountryOfResidence())
                                 .build()));
     }
-
 }

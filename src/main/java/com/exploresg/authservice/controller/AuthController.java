@@ -53,13 +53,13 @@ public class AuthController {
         // Remove "Bearer " prefix if present
         String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
         System.out.println("Received token: " + token);
-        // You can return a simple response for now
         return ResponseEntity.ok("Token logged successfully");
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-        User user = userService.upsertUserFromJwt(jwt);
+        // For /me we just fetch or create the user, no role assignment
+        User user = userService.upsertUserFromJwt(jwt, null);
         return ResponseEntity.ok(user);
     }
 
@@ -68,7 +68,9 @@ public class AuthController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody SignupProfileRequest request) {
 
-        User user = userService.upsertUserFromJwt(jwt);
+        // Pass requestedRole from the signup request (only applied if user is new)
+        User user = userService.upsertUserFromJwt(jwt, request.getRequestedRole());
+
         UserProfile profile = userService.createOrUpdateProfile(user.getId(), request);
 
         SignupResponse response = new SignupResponse(
@@ -86,5 +88,4 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+import com.exploresg.authservice.model.Role;
+
 @Data
 public class SignupProfileRequest {
 
@@ -25,4 +27,6 @@ public class SignupProfileRequest {
     private String passportNumber;
     private String preferredLanguage;
     private String countryOfResidence;
+
+    private Role requestedRole;
 }
