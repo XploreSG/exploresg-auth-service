@@ -20,6 +20,7 @@ import com.exploresg.authservice.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -56,6 +57,7 @@ public class AuthController {
         return ResponseEntity.ok("Token logged successfully");
     }
 
+    // Secured endpoint for any authenticated user
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
         // For /me we just fetch or create the user, no role assignment
@@ -63,6 +65,21 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
+    // Secured endpoint for Admins only
+    @GetMapping("/admin/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAdminDashboard() {
+        return ResponseEntity.ok("Welcome to the Admin Dashboard!");
+    }
+
+    // Secured endpoint for Fleet Managers and Admins
+    @GetMapping("/fleet/vehicles")
+    @PreAuthorize("hasAnyRole('FLEET_MANAGER', 'ADMIN')")
+    public ResponseEntity<String> getFleetVehicles() {
+        return ResponseEntity.ok("Here is the list of fleet vehicles.");
+    }
+
+    // Existing signup logic
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signupProfile(
             @AuthenticationPrincipal Jwt jwt,
@@ -88,4 +105,5 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
 }
