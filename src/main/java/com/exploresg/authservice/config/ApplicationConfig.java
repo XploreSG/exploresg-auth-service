@@ -25,18 +25,13 @@ public class ApplicationConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    /*
-     * TEMPORARILY DISABLED: This custom provider interferes with the default
-     * OAuth2 resource server configuration needed to validate Google's tokens.
-     * We can re-enable this later for email/password login.
-     */
-    // @Bean
-    // public AuthenticationProvider authenticationProvider() {
-    // DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    // authProvider.setUserDetailsService(userDetailsService());
-    // authProvider.setPasswordEncoder(passwordEncoder());
-    // return authProvider;
-    // }
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

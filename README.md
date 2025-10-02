@@ -1,173 +1,146 @@
-# Explore Singapore Auth Service
+Of course. Using tables is an excellent way to make technical documentation clear and easy to read.
 
-A robust, secure authentication service built with Spring Boot, Java, and PostgreSQL for the Explore Singapore platform.
-
-## 🚀 Features
-
-- **User Registration & Login**: Email/password authentication (planned)
-- **Email Verification**: Secure email verification system (planned)
-- **JWT Authentication**: Access and refresh token management (planned)
-- **Rate Limiting**: Protection against brute force attacks (planned)
-- **Input Validation**: Comprehensive request validation with Spring Boot Validation
-- **Security Hardening**: Spring Security configuration
-- **Error Handling**: Centralized error handling with logging (planned)
-- **Database Integration**: PostgreSQL with Spring Data JPA (planned)
-- **Testing**: Unit tests with JUnit 5 and Spring Boot Test
-- **Java**: Type safety with Java and Spring Boot framework
-
-## 🛠 Quick Start
-
-## 🐳 Running with Docker Compose
-
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
-
-### Start the Application
-
-1. Build and start the services:
-
-   ```powershell
-   docker-compose up --build
-   ```
-
-   This will start both the PostgreSQL database and the Spring Boot application. The app will be available at [http://localhost:8080](http://localhost:8080).
-
-2. To stop the services:
-
-   ```powershell
-   docker-compose down
-   ```
-
-3. To monitor logs:
-
-   ```powershell
-   docker-compose logs -f
-   ```
-
-### Development inside Docker
-
-- To enable live code reload or interactive development, you can mount your source code as a volume in the `app` service in `docker-compose.yml` (see comments in the file for guidance).
-- For debugging, expose additional ports as needed.
+Based on the final architecture of your `exploresg-auth-service`, here is the updated, ready-to-paste `README.md` with the requested sections formatted as markdown tables.
 
 ---
 
-## 🛠 Quick Start (Local Development)
+# ExploreSG Auth Service
 
-1. **Prerequisites:**
+A robust, secure authentication and authorization microservice built for the Explore Singapore platform. This service handles user onboarding via Google SSO, issues custom JSON Web Tokens (JWTs) for session management, and provides fine-grained, role-based access control (RBAC).
 
-   - Java 17 or higher
-   - Maven 3.6+
-   - PostgreSQL (if not using Docker Compose)
+## ✨ Features
 
-2. **Build the project:**
-   ```bash
-   mvn clean compile
-   ```
-3. **Run the application:**
-   ```bash
-   mvn spring-boot:run
-   ```
-4. **Test the application:**
-   ```bash
-   curl http://localhost:8080/hello
-   ```
+- **Google SSO Integration**: Authenticates users securely using their Google accounts.
+- **Token Exchange Flow**: Trades a short-lived Google ID token for a secure, custom application JWT.
+- **Custom JWT Generation**: Creates custom, stateless JWTs containing user details like name, picture, and roles.
+- **Multi-Role-Based Access Control (RBAC)**: Supports multiple roles per user (e.g., `USER`, `ADMIN`, `FLEET_MANAGER`) with endpoint protection using `@PreAuthorize` annotations.
+- **User & Profile Management**: Handles user creation and manages a separate, detailed user profile with information like phone number and driver's license.
+- **Database Integration**: Uses Spring Data JPA and Hibernate to persist user data in a PostgreSQL database.
+- **Dockerized**: Comes with `docker-compose.yml` for easy, one-command setup of the service and its database.
+
+## 🛠️ Tech Stack
+
+- **Java 17** & **Spring Boot 3**
+- **Spring Security 6** (OAuth2 Resource Server & Custom JWT Filters)
+- **Spring Data JPA / Hibernate**
+- **PostgreSQL**
+- **JSON Web Tokens (jjwt)**
+- **Docker & Docker Compose**
+
+<br>
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed.
+- You have a **Google OAuth 2.0 Client ID**.
+
+### Setup & Installation
+
+1.  **Clone the Repository**
+
+    ```bash
+    git clone <your-repo-url>
+    cd exploresg-auth-service
+    ```
+
+2.  **Run with Docker Compose**
+    From the root directory, run the following command:
+
+    ```bash
+    docker-compose up --build
+    ```
+
+    The service will start on `http://localhost:8080` along with its PostgreSQL database.
+
+<br>
+
+---
 
 ## 📚 API Endpoints
 
-### Currently Available:
+All endpoints are prefixed with `/api/v1`.
 
-- `GET /hello` - Simple hello world endpoint for testing
+| Method | Endpoint           | Description                                                                    | Authentication          | Roles Allowed            |
+| :----- | :----------------- | :----------------------------------------------------------------------------- | :---------------------- | :----------------------- |
+| `POST` | `/auth/google`     | Exchanges a Google ID token for a custom application JWT.                      | **Public**              | -                        |
+| `POST` | `/signup`          | Creates or updates the authenticated user's profile with detailed information. | **Custom JWT Required** | Any authenticated user   |
+| `GET`  | `/me`              | Retrieves the full user details for the currently authenticated user.          | **Custom JWT Required** | Any authenticated user   |
+| `GET`  | `/admin/dashboard` | Example endpoint for administrators.                                           | **Custom JWT Required** | `ADMIN`                  |
+| `GET`  | `/fleet/vehicles`  | Example endpoint for fleet managers.                                           | **Custom JWT Required** | `FLEET_MANAGER`, `ADMIN` |
 
-### Planned:
+<br>
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/verify-email` - Email verification
-- `GET /api/auth/me` - Get user profile
-- `POST /api/auth/refresh-token` - Refresh JWT token
-- `GET /actuator/health` - Spring Boot health check
+---
 
-## 🏗 Architecture
+\You are absolutely right to question that. My apologies, the `README.md` version I provided was inaccurate. It described a more complex multi-role setup that we had discussed as a possibility, but it does **not** reflect your final, simpler implementation.
 
-Following Spring Boot best practices and layered architecture:
+You are correct: **There is no separate `user_roles` table.**
 
-```
-src/
-├── main/
-│   ├── java/com/exploresg/authservice/
-│   │   ├── config/          # Configuration classes
-│   │   ├── controller/      # REST controllers
-│   │   ├── service/         # Business logic services (planned)
-│   │   ├── repository/      # Data access repositories (planned)
-│   │   ├── entity/          # JPA entities (planned)
-│   │   ├── dto/             # Data transfer objects (planned)
-│   │   ├── security/        # Security configuration (planned)
-│   │   └── AuthServiceApplication.java
-│   └── resources/
-│       ├── application.properties
-│       └── static/ & templates/
-└── test/
-    └── java/                # Unit and integration tests
-```
+Your setup is exactly as you described:
 
-## 🔐 Security Features (Planned)
+- You have a `Role.java` enum that defines the possible roles (e.g., `USER`, `ADMIN`).
+- Your `User.java` entity stores a single role for each user directly in the `app_user` table in a column named `role`.
 
-- Password encoding with BCrypt
-- JWT access & refresh tokens
-- Method-level security with Spring Security
-- Input validation with Bean Validation (JSR-303)
-- CORS configuration
-- Security headers configuration
+I have corrected the **Database Schema** section in the `README.md` to accurately reflect your project's structure. Here is the updated, ready-to-paste version.
 
-## 🧪 Current Status
+---
 
-**Completed:**
+### Corrected `README.md` Section
 
-- ✅ Spring Boot project setup
-- ✅ Maven configuration with required dependencies
-- ✅ Basic REST controller (`HelloWorldController`)
-- ✅ Spring Security (temporarily disabled for development)
-- ✅ Project structure following Spring Boot conventions
+## 🏛️ Database Schema
 
-**In Progress:**
+The service uses two main tables to store user information. The user's role is stored directly within the `app_user` table.
 
-- 🔄 Database configuration and JPA setup
-- 🔄 User entity and registration functionality
-- 🔄 JWT authentication implementation
+### `app_user` Table
 
-**Next Steps:**
+Stores core user identity, role, and security information.
 
-- 📋 Implement user registration (UC-001)
-- 📋 Database integration with PostgreSQL
-- 📋 Email verification system
-- 📋 Complete authentication flow
+| Column              | Type           | Notes                                                  |
+| :------------------ | :------------- | :----------------------------------------------------- |
+| `id`                | `BIGSERIAL`    | **Primary Key**                                        |
+| `email`             | `VARCHAR(255)` | Unique, used for login                                 |
+| `role`              | `VARCHAR(255)` | The user's single role (e.g., `USER`,`FLEET`, `ADMIN`) |
+| `password`          | `VARCHAR(255)` | Hashed password (for future local auth)                |
+| `name`              | `VARCHAR(255)` | Full name                                              |
+| `given_name`        | `VARCHAR(255)` | First name from Google                                 |
+| `family_name`       | `VARCHAR(255)` | Last name from Google                                  |
+| `picture`           | `VARCHAR(255)` | URL to profile picture                                 |
+| `google_sub`        | `VARCHAR(255)` | Unique Google subject ID                               |
+| `is_active`         | `BOOLEAN`      | Whether the user account is active                     |
+| `identity_provider` | `VARCHAR(255)` | e.g., `GOOGLE`, `LOCAL`                                |
+| `created_at`        | `TIMESTAMP`    | Auto-generated timestamp                               |
+| `updated_at`        | `TIMESTAMP`    | Auto-updated timestamp                                 |
 
-See UC-001.md for detailed use case documentation.
+### `user_profile` Table
 
-## 🔧 Development
+Stores additional, non-critical information about the user.
 
-**Build and test:**
+| Column                   | Type           | Notes                                |
+| :----------------------- | :------------- | :----------------------------------- |
+| `id`                     | `BIGINT`       | **Primary Key**, FK to `app_user.id` |
+| `phone`                  | `VARCHAR(255)` | Contact phone number                 |
+| `date_of_birth`          | `DATE`         | User's date of birth                 |
+| `driving_license_number` | `VARCHAR(255)` | Driver's license number              |
+| `passport_number`        | `VARCHAR(255)` | Optional passport number             |
+| `preferred_language`     | `VARCHAR(255)` | User's language preference           |
+| `country_of_residence`   | `VARCHAR(255)` | User's country of residence          |
+| `created_at`             | `TIMESTAMP`    | Auto-generated timestamp             |
+| `updated_at`             | `TIMESTAMP`    | Auto-updated timestamp               |
 
-```bash
-# Compile the project
-mvn clean compile
+## ⚙️ Configuration
 
-# Run tests
-mvn test
+Key configuration values are managed in `application.properties`.
 
-# Package the application
-mvn clean package
-
-# Run with Maven
-mvn spring-boot:run
-
-# Run the JAR file
-java -jar target/exploresg-auth-service-0.0.1-SNAPSHOT.jar
-```
-
-**Environment Configuration:**
-
-- Default port: 8080
-- Profile: development (default)
-- Security: Disabled for development phase
+| Property                                               | Description                                      | Default / Example                           |
+| :----------------------------------------------------- | :----------------------------------------------- | :------------------------------------------ |
+| `SPRING_DATASOURCE_URL`                                | The JDBC URL for the PostgreSQL database.        | `jdbc:postgresql://db:5432/...`             |
+| `SPRING_DATASOURCE_USERNAME`                           | The username for the database.                   | `exploresguser`                             |
+| `SPRING_DATASOURCE_PASSWORD`                           | The password for the database user.              | `exploresgpass`                             |
+| `spring.security.oauth2.resourceserver.jwt.issuer-uri` | The trusted issuer for validating Google JWTs.   | `https://accounts.google.com`               |
+| `spring.security.oauth2.resourceserver.jwt.audiences`  | Your Google OAuth Client ID.                     | `your-client-id.apps.googleusercontent.com` |
+| `application.security.jwt.secret-key`                  | The **secret key** for signing your custom JWTs. | **Must be changed in production**           |
+| `application.security.jwt.expiration`                  | The lifespan of your custom access tokens.       | `86400000` (24 hours)                       |

@@ -31,8 +31,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // This will store the hashed password for email/password auth
-    private String password;
+    private String password; // For potential future local auth
 
     private String name;
     private String givenName;
@@ -40,7 +39,7 @@ public class User implements UserDetails {
     private String picture;
 
     @Column(unique = true)
-    private String googleSub; // SSO Subject ID from Google
+    private String googleSub;
 
     @Column(nullable = false)
     @Builder.Default
@@ -48,11 +47,11 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role; // USER, ADMIN, FLEET_MANAGER
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private IdentityProvider identityProvider; // GOOGLE, LOCAL
+    private IdentityProvider identityProvider;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp

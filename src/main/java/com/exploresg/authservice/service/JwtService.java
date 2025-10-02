@@ -1,5 +1,6 @@
 package com.exploresg.authservice.service;
 
+import com.exploresg.authservice.model.User; // <-- Import the User model
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -40,13 +41,25 @@ public class JwtService {
         return generateToken(new HashMap<>(), userDetails);
     }
 
+    // --- THIS IS THE MODIFIED METHOD ---
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        // Add roles to the claims
+        // Add roles
         extraClaims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
+
+        // Check if the userDetails is an instance of our User class
+        if (userDetails instanceof User) {
+            User user = (User) userDetails;
+            // Add custom claims for name and picture
+            extraClaims.put("givenName", user.getGivenName());
+            extraClaims.put("familyName", user.getFamilyName());
+            extraClaims.put("picture", user.getPicture());
+        }
+
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
+    // --- END OF MODIFICATION ---
 
     public String generateRefreshToken(UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);

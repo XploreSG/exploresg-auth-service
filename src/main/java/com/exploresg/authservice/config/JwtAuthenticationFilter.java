@@ -12,12 +12,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-// import org.springframework.stereotype.Component; <-- REMOVE OR COMMENT OUT THIS LINE
+// import org.springframework.stereotype.Component; // Ensure this is commented out or removed
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
-// @Component <-- REMOVE OR COMMENT OUT THIS LINE
+// CRITICAL: This class should NOT have the @Component annotation.
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -29,13 +28,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        // This check prevents the filter from running on the public auth endpoints
+        if (request.getServletPath().contains("/api/v1/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         final String jwt = authHeader.substring(7);
-        final String userEmail = jwtService.extractUsername(jwt);
+        final String userEmail;
+
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            // If the token is invalid (e.g., a Google token), just continue the chain.
+            // Spring Security will handle the unauthorized error later.
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
