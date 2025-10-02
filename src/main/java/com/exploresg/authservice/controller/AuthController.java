@@ -1,27 +1,30 @@
 package com.exploresg.authservice.controller;
 
-import org.springframework.security.oauth2.jwt.Jwt;
-
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.exploresg.authservice.dto.AuthSessionResponse;
+import com.exploresg.authservice.dto.RefreshTokenRequest;
 import com.exploresg.authservice.dto.SignupProfileRequest;
 import com.exploresg.authservice.dto.SignupResponse;
+import com.exploresg.authservice.dto.TokenPairResponse;
+import com.exploresg.authservice.model.Role;
 import com.exploresg.authservice.model.User;
 import com.exploresg.authservice.model.UserProfile;
+import com.exploresg.authservice.service.TokenService;
 import com.exploresg.authservice.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class AuthController {
 
     private final UserService userService;
+    private final TokenService tokenService;
 
     @GetMapping("/check")
     public ResponseEntity<?> checkUser(@AuthenticationPrincipal Jwt jwt) {
@@ -50,15 +54,27 @@ public class AuthController {
 
     @PostMapping("/auth/log-token")
     public ResponseEntity<?> logToken(@RequestHeader("Authorization") String authHeader) {
-        // Remove "Bearer " prefix if present
         String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
         System.out.println("Received token: " + token);
         return ResponseEntity.ok("Token logged successfully");
     }
 
+    @PostMapping("/auth/session")
+    public ResponseEntity<AuthSessionResponse> createSession(@AuthenticationPrincipal Jwt jwt) {
+        User user = userService.upsertUserFromJwt(jwt, null);
+        TokenPairResponse tokens = tokenService.generateTokenPair(user);
+        AuthSessionResponse response = mapToSessionResponse(user, tokens);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<TokenPairResponse> refreshTokens(@Valid @RequestBody RefreshTokenRequest request) {
+        TokenPairResponse tokens = tokenService.refreshToken(request.refreshToken());
+        return ResponseEntity.ok(tokens);
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-        // For /me we just fetch or create the user, no role assignment
         User user = userService.upsertUserFromJwt(jwt, null);
         return ResponseEntity.ok(user);
     }
@@ -68,10 +84,12 @@ public class AuthController {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody SignupProfileRequest request) {
 
-        // Pass requestedRole from the signup request (only applied if user is new)
-        User user = userService.upsertUserFromJwt(jwt, request.getRequestedRole());
+        Role requestedRole = request.getRequestedRole();
+        User user = userService.upsertUserFromJwt(jwt, requestedRole);
 
         UserProfile profile = userService.createOrUpdateProfile(user.getId(), request);
+
+        TokenPairResponse tokens = tokenService.generateTokenPair(user);
 
         SignupResponse response = new SignupResponse(
                 user.getId(),
@@ -84,8 +102,20 @@ public class AuthController {
                 profile.getDrivingLicenseNumber(),
                 profile.getPassportNumber(),
                 profile.getPreferredLanguage(),
-                profile.getCountryOfResidence());
+                profile.getCountryOfResidence(),
+                tokens);
 
         return ResponseEntity.ok(response);
+    }
+
+    private AuthSessionResponse mapToSessionResponse(User user, TokenPairResponse tokens) {
+        return new AuthSessionResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getGivenName(),
+                user.getFamilyName(),
+                user.getPicture(),
+                user.getRole(),
+                tokens);
     }
 }

@@ -1,25 +1,18 @@
 package com.exploresg.authservice.dto;
 
-import java.time.LocalDate;
+import com.exploresg.authservice.model.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class SignupResponse {
+public class AuthSessionResponse {
     private Long userId;
     private String email;
     private String givenName;
     private String familyName;
     private String picture;
-
-    private String phone;
-    private LocalDate dateOfBirth;
-    private String drivingLicenseNumber;
-    private String passportNumber;
-    private String preferredLanguage;
-    private String countryOfResidence;
-
+    private Role role;
     private TokenPairResponse tokens;
 }

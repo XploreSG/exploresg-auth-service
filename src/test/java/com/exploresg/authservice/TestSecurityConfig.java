@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 public class TestSecurityConfig {
 
     @Bean
+    @Primary
     public JwtDecoder jwtDecoder() {
         return new JwtDecoder() {
             @Override

@@ -1,6 +1,7 @@
 package com.exploresg.authservice.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,5 @@ public interface TokenRepository extends JpaRepository<AuthToken, Long> {
 
     List<AuthToken> findAllByUserAndIsRevokedFalse(User user);
 
+    Optional<AuthToken> findByTokenValueAndIsRevokedFalse(String tokenValue);
 }
