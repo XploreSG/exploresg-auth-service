@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.Base64;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,10 +93,24 @@ class JwtServiceUnitTest {
         String access = svc.generateToken(u);
         String refresh = svc.generateRefreshToken(u);
 
-        Date accessExp = svc.extractClaim(access, Claims::getExpiration);
-        Date refreshExp = svc.extractClaim(refresh, Claims::getExpiration);
+        long accessExp = extractExpirationFromToken(access);
+        long refreshExp = extractExpirationFromToken(refresh);
 
-        assertThat(refreshExp.getTime()).isGreaterThan(accessExp.getTime());
+        assertThat(refreshExp).isGreaterThan(accessExp);
+    }
+
+    private long extractExpirationFromToken(String token) throws Exception {
+        String[] parts = token.split("\\.");
+        if (parts.length < 2)
+            throw new IllegalArgumentException("Invalid JWT token");
+        String payload = parts[1];
+        byte[] decoded = Base64.getUrlDecoder().decode(payload);
+        ObjectMapper m = new ObjectMapper();
+        Map<?, ?> claims = m.readValue(decoded, Map.class);
+        Number exp = (Number) claims.get("exp");
+        if (exp == null)
+            throw new IllegalStateException("exp claim missing");
+        return exp.longValue() * 1000L; // convert seconds -> ms
     }
 
 }
