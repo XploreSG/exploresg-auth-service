@@ -2,6 +2,7 @@ package com.exploresg.authservice.service;
 
 import com.exploresg.authservice.dto.AuthResponse;
 import com.exploresg.authservice.model.User;
+import com.exploresg.authservice.model.UserProfile;
 import com.exploresg.authservice.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -19,28 +20,35 @@ public class AuthenticationService {
     private final JwtService customJwtService;
     private final UserProfileRepository userProfileRepository;
 
-    // --- THIS IS THE FIX ---
-    // Change @Transactional(readOnly = true) to just @Transactional
     @Transactional
     public AuthResponse signInWithGoogle(String googleToken) {
         try {
-            // 1. Decode and validate the Google token
             Jwt jwt = jwtDecoder.decode(googleToken);
-
-            // 2. Create or update the user in your database (this requires a write
-            // transaction)
             User user = userService.upsertUserFromJwt(jwt, null);
-
-            // 3. Generate your own custom JWT for this user
             String customToken = customJwtService.generateToken(user);
 
-            // 4. Check if the user's profile exists
-            boolean profileExists = userProfileRepository.existsById(user.getId());
+            // Find the user's profile, if it exists
+            UserProfile userProfile = userProfileRepository.findById(user.getId()).orElse(null);
 
-            // 5. Return the custom token and the profile status
+            // Build the UserInfo DTO
+            AuthResponse.UserInfo userInfo = AuthResponse.UserInfo.builder()
+                    .userId(user.getId())
+                    .email(user.getEmail())
+                    .givenName(user.getGivenName())
+                    .familyName(user.getFamilyName())
+                    .picture(user.getPicture())
+                    .phone(userProfile != null ? userProfile.getPhone() : null)
+                    .dateOfBirth(userProfile != null ? userProfile.getDateOfBirth().toString() : null)
+                    .drivingLicenseNumber(userProfile != null ? userProfile.getDrivingLicenseNumber() : null)
+                    .passportNumber(userProfile != null ? userProfile.getPassportNumber() : null)
+                    .preferredLanguage(userProfile != null ? userProfile.getPreferredLanguage() : null)
+                    .countryOfResidence(userProfile != null ? userProfile.getCountryOfResidence() : null)
+                    .build();
+
             return AuthResponse.builder()
                     .token(customToken)
-                    .requiresProfileSetup(!profileExists)
+                    .requiresProfileSetup(userProfile == null)
+                    .userInfo(userInfo) // <-- Include the user info in the response
                     .build();
 
         } catch (JwtException e) {
