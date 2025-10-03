@@ -66,17 +66,6 @@ All endpoints are prefixed with `/api/v1`.
 
 <br>
 
-
-\You are absolutely right to question that. My apologies, the `README.md` version I provided was inaccurate. It described a more complex multi-role setup that we had discussed as a possibility, but it does **not** reflect your final, simpler implementation.
-
-You are correct: **There is no separate `user_roles` table.**
-
-Your setup is exactly as you described:
-
-- You have a `Role.java` enum that defines the possible roles (e.g., `USER`, `ADMIN`).
-- Your `User.java` entity stores a single role for each user directly in the `app_user` table in a column named `role`.
-
-
 ## 🏛️ Database Schema
 
 The service uses two main tables to store user information. The user's role is stored directly within the `app_user` table.
