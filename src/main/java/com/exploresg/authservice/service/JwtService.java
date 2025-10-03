@@ -91,9 +91,6 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
-                // allow small clock skew (1 second) to avoid failing on millisecond timing
-                // races in tests
-                .setAllowedClockSkewSeconds(1)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
