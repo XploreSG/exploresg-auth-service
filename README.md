@@ -23,7 +23,6 @@ A robust, secure authentication and authorization microservice built for the Exp
 
 <br>
 
----
 
 ## 🚀 Getting Started
 
@@ -52,7 +51,6 @@ A robust, secure authentication and authorization microservice built for the Exp
 
 <br>
 
----
 
 ## 📚 API Endpoints
 
@@ -68,7 +66,6 @@ All endpoints are prefixed with `/api/v1`.
 
 <br>
 
----
 
 \You are absolutely right to question that. My apologies, the `README.md` version I provided was inaccurate. It described a more complex multi-role setup that we had discussed as a possibility, but it does **not** reflect your final, simpler implementation.
 
@@ -79,11 +76,6 @@ Your setup is exactly as you described:
 - You have a `Role.java` enum that defines the possible roles (e.g., `USER`, `ADMIN`).
 - Your `User.java` entity stores a single role for each user directly in the `app_user` table in a column named `role`.
 
-I have corrected the **Database Schema** section in the `README.md` to accurately reflect your project's structure. Here is the updated, ready-to-paste version.
-
----
-
-### Corrected `README.md` Section
 
 ## 🏛️ Database Schema
 
