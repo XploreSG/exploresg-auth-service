@@ -1,9 +1,3 @@
-Of course. Using tables is an excellent way to make technical documentation clear and easy to read.
-
-Based on the final architecture of your `exploresg-auth-service`, here is the updated, ready-to-paste `README.md` with the requested sections formatted as markdown tables.
-
----
-
 # ExploreSG Auth Service
 
 A robust, secure authentication and authorization microservice built for the Explore Singapore platform. This service handles user onboarding via Google SSO, issues custom JSON Web Tokens (JWTs) for session management, and provides fine-grained, role-based access control (RBAC).
