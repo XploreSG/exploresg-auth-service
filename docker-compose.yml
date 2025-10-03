@@ -20,6 +20,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    # This service does not need to be on the shared network
+    networks:
+      - default
 
   backend-auth-dev:
     build:
@@ -36,6 +39,19 @@ services:
     ports:
       - "8080:8080"
     restart: on-failure
+    # --- ADD THIS SECTION ---
+    # Connects the service to two networks:
+    # 1. The 'default' network to talk to its own DB.
+    # 2. The shared 'exploresg-network' to talk to other services.
+    networks:
+      - default
+      - exploresg-network
 
 volumes:
   xpl-auth-pgdata:
+
+# Define the shared network as external
+networks:
+  exploresg-network:
+    name: exploresg-net
+    external: true
