@@ -1,3 +1,5 @@
+[![CI Backend - Build, Test & Security Scan](https://github.com/XploreSG/exploresg-auth-service/actions/workflows/ci-java.yml/badge.svg)](https://github.com/XploreSG/exploresg-auth-service/actions/workflows/ci-java.yml)
+
 # ExploreSG Auth Service
 
 A robust, secure authentication and authorization microservice built for the Explore Singapore platform. This service handles user onboarding via Google SSO, issues custom JSON Web Tokens (JWTs) for session management, and provides fine-grained, role-based access control (RBAC).
