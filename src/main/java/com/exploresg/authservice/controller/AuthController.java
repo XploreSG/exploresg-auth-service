@@ -1,27 +1,18 @@
 package com.exploresg.authservice.controller;
 
-import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.exploresg.authservice.dto.SignupProfileRequest;
 import com.exploresg.authservice.dto.SignupResponse;
 import com.exploresg.authservice.model.User;
 import com.exploresg.authservice.model.UserProfile;
 import com.exploresg.authservice.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,46 +21,27 @@ public class AuthController {
 
     private final UserService userService;
 
+    // This endpoint remains public for pre-login checks if needed
     @GetMapping("/check")
-    public ResponseEntity<?> checkUser(@AuthenticationPrincipal Jwt jwt) {
-        if (jwt == null) {
-            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+    public ResponseEntity<?> checkUser(@RequestParam String email) {
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email parameter is required"));
         }
-
-        String email = jwt.getClaim("email");
-        if (email == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "No email in token"));
-        }
-
         boolean exists = userService.existsByEmail(email);
-
-        return ResponseEntity.ok(Map.of(
-                "exists", exists,
-                "email", email));
+        return ResponseEntity.ok(Map.of("exists", exists, "email", email));
     }
 
-    @PostMapping("/auth/log-token")
-    public ResponseEntity<?> logToken(@RequestHeader("Authorization") String authHeader) {
-        // Remove "Bearer " prefix if present
-        String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
-        System.out.println("Received token: " + token);
-        return ResponseEntity.ok("Token logged successfully");
-    }
-
+    // This secured endpoint returns details for the currently logged-in user
     @GetMapping("/me")
-    public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-        // For /me we just fetch or create the user, no role assignment
-        User user = userService.upsertUserFromJwt(jwt, null);
+    public ResponseEntity<User> getMe(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(user);
     }
 
+    // This is the corrected signup method
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signupProfile(
-            @AuthenticationPrincipal Jwt jwt,
+            @AuthenticationPrincipal User user, // <-- FIX: Correctly expects a 'User' object
             @Valid @RequestBody SignupProfileRequest request) {
-
-        // Pass requestedRole from the signup request (only applied if user is new)
-        User user = userService.upsertUserFromJwt(jwt, request.getRequestedRole());
 
         UserProfile profile = userService.createOrUpdateProfile(user.getId(), request);
 
@@ -87,5 +59,18 @@ public class AuthController {
                 profile.getCountryOfResidence());
 
         return ResponseEntity.ok(response);
+    }
+
+    // Role-protected endpoints
+    @GetMapping("/admin/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAdminDashboard() {
+        return ResponseEntity.ok("Welcome to the Admin Dashboard!");
+    }
+
+    @GetMapping("/fleet/vehicles")
+    @PreAuthorize("hasAnyRole('FLEET_MANAGER', 'ADMIN')")
+    public ResponseEntity<String> getFleetVehicles() {
+        return ResponseEntity.ok("Here is the list of fleet vehicles.");
     }
 }
