@@ -726,6 +726,4 @@ For issues, questions, or contributions:
 - **Documentation:** Check `/docs` directory
 - **Email:** [support@exploresg.com](mailto:support@exploresg.com)
 
----
-
 **Built with ❤️ for ExploreSG Platform**
