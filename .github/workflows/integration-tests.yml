@@ -1,0 +1,185 @@
+name: 🚀 Integration Tests - Auth Service
+
+# Manual trigger workflow for industry-grade integration testing
+# This workflow can be triggered manually from the GitHub Actions tab
+on:
+    workflow_dispatch:
+        inputs:
+            test_environment:
+                description: "Test Environment"
+                required: true
+                default: "integration"
+                type: choice
+                options:
+                    - integration
+                    - staging
+                    - local-simulation
+            test_suite:
+                description: "Test Suite to Run"
+                required: true
+                default: "all"
+                type: choice
+                options:
+                    - all
+                    - hello-world
+                    - database-integration
+                    - api-endpoints
+            log_level:
+                description: "Log Level"
+                required: false
+                default: "INFO"
+                type: choice
+                options:
+                    - DEBUG
+                    - INFO
+                    - WARN
+                    - ERROR
+
+jobs:
+    integration-tests:
+        name: 🧪 Run Integration Tests
+        runs-on: ubuntu-latest
+
+        # Service containers for integration testing
+        services:
+            postgres:
+                image: postgres:15
+                env:
+                    POSTGRES_DB: test_auth_db
+                    POSTGRES_USER: testuser
+                    POSTGRES_PASSWORD: testpass
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: 📋 Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Full history for better analysis
+
+            - name: ☕ Set up JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "17"
+                  distribution: "temurin"
+                  cache: maven
+
+            - name: 🔍 Validate Project Structure
+              run: |
+                  echo "🏗️ Validating project structure..."
+                  ls -la
+                  echo "📁 Source structure:"
+                  find src -type f -name "*.java" | head -10
+                  echo "📄 Maven configuration:"
+                  cat pom.xml | grep -A 5 -B 5 "spring-boot"
+
+            - name: 🏗️ Build Application
+              run: |
+                  echo "🔨 Building the authentication service..."
+                  ./mvnw clean compile -B -V
+                  echo "✅ Build completed successfully!"
+
+            - name: 🧪 Run Unit Tests First
+              run: |
+                  echo "🔍 Running unit tests to ensure base functionality..."
+                  ./mvnw test -Dtest="!*Integration*" -B
+                  echo "✅ Unit tests completed!"
+
+            - name: 🚀 Run Integration Tests - Hello World Suite
+              if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'hello-world' }}
+              env:
+                  SPRING_PROFILES_ACTIVE: integration-test
+                  LOGGING_LEVEL_ROOT: ${{ github.event.inputs.log_level }}
+              run: |
+                  echo "🌟 Running Hello World Integration Tests..."
+                  ./mvnw test -Dtest="HelloWorldIntegrationTest" -B -Dspring.profiles.active=integration-test
+                  echo "✅ Hello World integration tests completed!"
+
+            - name: 🗄️ Run Database Integration Tests
+              if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'database-integration' }}
+              env:
+                  SPRING_PROFILES_ACTIVE: integration-test
+                  LOGGING_LEVEL_ROOT: ${{ github.event.inputs.log_level }}
+                  # Optional: Use real PostgreSQL for more comprehensive testing
+                  SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/test_auth_db
+                  SPRING_DATASOURCE_USERNAME: testuser
+                  SPRING_DATASOURCE_PASSWORD: testpass
+              run: |
+                  echo "🗃️ Running Database Integration Tests..."
+                  ./mvnw test -Dtest="AuthServiceDatabaseIntegrationTest" -B -Dspring.profiles.active=integration-test
+                  echo "✅ Database integration tests completed!"
+
+            - name: 🌐 Run API Endpoint Tests
+              if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'api-endpoints' }}
+              env:
+                  SPRING_PROFILES_ACTIVE: integration-test
+                  LOGGING_LEVEL_ROOT: ${{ github.event.inputs.log_level }}
+              run: |
+                  echo "🔗 Running API Endpoint Integration Tests..."
+                  ./mvnw test -Dtest="*Integration*Test" -B -Dspring.profiles.active=integration-test
+                  echo "✅ API endpoint tests completed!"
+
+            - name: 📊 Generate Test Reports
+              if: always()
+              run: |
+                  echo "📈 Generating comprehensive test reports..."
+                  ./mvnw jacoco:report -B
+                  echo "📋 Test Summary:"
+                  find target/surefire-reports -name "*.xml" -exec echo "📄 {}" \; -exec cat {} \; || true
+
+            - name: 📁 Upload Test Reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: integration-test-reports-${{ github.event.inputs.test_suite }}-${{ github.run_number }}
+                  path: |
+                      target/surefire-reports/
+                      target/site/jacoco/
+                  retention-days: 30
+
+            - name: 📋 Upload JaCoCo Coverage Reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: jacoco-coverage-report-${{ github.run_number }}
+                  path: target/site/jacoco/
+                  retention-days: 30
+
+            - name: 🎯 Test Results Summary
+              if: always()
+              run: |
+                  echo "## 🚀 Integration Test Results Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "### 📊 Test Configuration" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Environment**: ${{ github.event.inputs.test_environment }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Test Suite**: ${{ github.event.inputs.test_suite }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Log Level**: ${{ github.event.inputs.log_level }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Workflow Run**: #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "### 📈 Coverage & Reports" >> $GITHUB_STEP_SUMMARY
+                  echo "- Test reports and coverage data have been uploaded as artifacts" >> $GITHUB_STEP_SUMMARY
+                  echo "- Check the 'Artifacts' section of this workflow run for detailed reports" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "### 🏗️ Project Info" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+            - name: 🎉 Success Notification
+              if: success()
+              run: |
+                  echo "🎉 All integration tests completed successfully!"
+                  echo "✅ The ExploreSG Auth Service is ready for deployment!"
+                  echo "📊 Check the artifacts for detailed test reports and coverage information."
+
+            - name: ❌ Failure Notification
+              if: failure()
+              run: |
+                  echo "❌ Integration tests failed!"
+                  echo "🔍 Please check the test reports for detailed error information."
+                  echo "📋 Review the logs above to identify and fix the issues."
+                  exit 1
