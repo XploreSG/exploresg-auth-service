@@ -114,7 +114,7 @@ jobs:
                   SPRING_DATASOURCE_PASSWORD: testpass
               run: |
                   echo "🗃️ Running Database Integration Tests..."
-                  ./mvnw test -Dtest="AuthServiceDatabaseIntegrationTest" -B -Dspring.profiles.active=integration-test
+                  ./mvnw test -Dtest="**/AuthServiceDatabaseIntegrationTest" -B -Dspring.profiles.active=integration-test
                   echo "✅ Database integration tests completed!"
 
             - name: 🌐 Run API Endpoint Tests
