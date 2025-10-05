@@ -1,4 +1,4 @@
-name: 🚀 Integration Tests - Auth Service
+name: Integration Tests - Auth Service
 
 # Manual trigger workflow for industry-grade integration testing
 # This workflow can be triggered manually from the GitHub Actions tab
@@ -68,6 +68,9 @@ jobs:
                   java-version: "17"
                   distribution: "temurin"
                   cache: maven
+
+            - name: Make mvnw executable
+              run: chmod +x mvnw
 
             - name: 🔍 Validate Project Structure
               run: |
