@@ -55,6 +55,7 @@ public class JwtService {
             extraClaims.put("givenName", user.getGivenName());
             extraClaims.put("familyName", user.getFamilyName());
             extraClaims.put("picture", user.getPicture());
+            extraClaims.put("userId", user.getUserId());
         }
 
         return buildToken(extraClaims, userDetails, jwtExpiration);
