@@ -3,11 +3,11 @@ services:
     image: postgres:15
     container_name: dev-exploresg-auth-db
     environment:
-      POSTGRES_DB: exploresg-auth-service-db
-      POSTGRES_USER: exploresguser
-      POSTGRES_PASSWORD: exploresgpass
+      POSTGRES_DB: ${POSTGRES_DB:-exploresg-auth-service-db}
+      POSTGRES_USER: ${POSTGRES_USER:-exploresguser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-exploresgpass}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - xpl-auth-pgdata:/var/lib/postgresql/data
     restart: unless-stopped
@@ -32,12 +32,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/exploresg-auth-service-db
-      SPRING_DATASOURCE_USERNAME: exploresguser
-      SPRING_DATASOURCE_PASSWORD: exploresgpass
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-exploresg-auth-service-db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-exploresguser}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-exploresgpass}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${SERVER_PORT:-8080}
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     restart: on-failure
     # --- ADD THIS SECTION ---
     # Connects the service to two networks:
