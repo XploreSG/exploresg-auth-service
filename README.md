@@ -100,7 +100,9 @@ A production-ready, secure authentication and authorization microservice built f
 | Maven               | 3.9+    | Build tool (included via wrapper) |
 | Google OAuth Client | -       | Authentication provider           |
 
-### Quick Start (Docker Compose)
+### Quick Start (Docker Compose) - **CLOUD READY ☁️**
+
+> **Note:** This application is now **cloud-ready** with externalized configuration! All sensitive data is managed through environment variables. See [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md) for cloud deployment.
 
 1. **Clone the Repository**
 
@@ -111,12 +113,11 @@ A production-ready, secure authentication and authorization microservice built f
 
 2. **Configure Environment Variables**
 
-   Create a `.env` file or set the following environment variables:
-
    ```bash
-   SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/exploresg-auth-service-db
-   SPRING_DATASOURCE_USERNAME=exploresguser
-   SPRING_DATASOURCE_PASSWORD=exploresgpass
+   # Copy the example environment file
+   cp .env.example .env
+
+   # Edit .env with your configuration (defaults work for local development)
    ```
 
 3. **Start the Application**
@@ -129,6 +130,24 @@ A production-ready, secure authentication and authorization microservice built f
    ```bash
    curl http://localhost:8080/health
    ```
+
+### Cloud Deployment
+
+This service is production-ready and can be deployed to:
+
+| Provider                   | Documentation                                                         |
+| -------------------------- | --------------------------------------------------------------------- |
+| **AWS** (ECS/Fargate)      | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#aws-deployment)   |
+| **Azure** (App Service)    | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#azure-deployment) |
+| **GCP** (Cloud Run)        | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#gcp-deployment)   |
+| **Kubernetes**             | See `kubernetes/` directory                                           |
+| **CI/CD** (GitHub Actions) | See `.github/workflows/` directory                                    |
+
+📖 **Quick Links:**
+
+- [🚀 Deployment Guide](README-DEPLOYMENT.md) - Step-by-step deployment instructions
+- [⚙️ Environment Setup](docs/ENVIRONMENT-SETUP.md) - Comprehensive configuration guide
+- [🔐 Security Best Practices](docs/ENVIRONMENT-SETUP.md#security-best-practices) - Production security checklist
 
 ### Local Development Setup
 
@@ -340,18 +359,40 @@ curl -X POST http://localhost:8080/api/v1/signup \
 
 ## ⚙️ Configuration
 
-### Application Properties
+### 🆕 Cloud-Ready Configuration
 
-| Property                                               | Environment Variable         | Default                       | Description                                   |
-| ------------------------------------------------------ | ---------------------------- | ----------------------------- | --------------------------------------------- |
-| `spring.datasource.url`                                | `SPRING_DATASOURCE_URL`      | -                             | PostgreSQL connection URL                     |
-| `spring.datasource.username`                           | `SPRING_DATASOURCE_USERNAME` | -                             | Database username                             |
-| `spring.datasource.password`                           | `SPRING_DATASOURCE_PASSWORD` | -                             | Database password                             |
-| `spring.security.oauth2.resourceserver.jwt.issuer-uri` | -                            | `https://accounts.google.com` | Google OAuth issuer                           |
-| `spring.security.oauth2.resourceserver.jwt.audiences`  | -                            | Your Client ID                | Google OAuth client ID                        |
-| `application.security.jwt.secret-key`                  | -                            | -                             | JWT signing secret (**change in production**) |
-| `application.security.jwt.expiration`                  | -                            | `86400000`                    | JWT expiration (24 hours)                     |
-| `application.security.jwt.refresh-token.expiration`    | -                            | `604800000`                   | Refresh token expiration (7 days)             |
+All configuration is externalized using environment variables. See `.env.example` for all available options.
+
+### Critical Environment Variables
+
+| Variable               | Environment Variable         | Required | Description                                  |
+| ---------------------- | ---------------------------- | -------- | -------------------------------------------- |
+| Database URL           | `SPRING_DATASOURCE_URL`      | Yes      | PostgreSQL connection URL                    |
+| Database Username      | `SPRING_DATASOURCE_USERNAME` | Yes      | Database username                            |
+| Database Password      | `SPRING_DATASOURCE_PASSWORD` | Yes      | Database password                            |
+| JWT Secret             | `JWT_SECRET_KEY`             | Yes      | JWT signing secret (**use secret manager**)  |
+| OAuth2 Audiences       | `OAUTH2_JWT_AUDIENCES`       | Yes      | Google OAuth client ID                       |
+| Active Profile         | `SPRING_PROFILES_ACTIVE`     | No       | `dev`, `staging`, or `prod` (default: `dev`) |
+| JWT Expiration         | `JWT_EXPIRATION`             | No       | Token lifetime in ms (default: 24 hours)     |
+| JWT Refresh Expiration | `JWT_REFRESH_EXPIRATION`     | No       | Refresh token lifetime (default: 7 days)     |
+
+### Configuration Profiles
+
+| Profile   | File                             | Purpose                     |
+| --------- | -------------------------------- | --------------------------- |
+| `dev`     | `application-dev.properties`     | Local development (verbose) |
+| `staging` | `application-staging.properties` | Staging environment         |
+| `prod`    | `application-prod.properties`    | Production (optimized)      |
+
+### Environment Files
+
+| File              | Purpose                         | Commit to Git?         |
+| ----------------- | ------------------------------- | ---------------------- |
+| `.env`            | Local development configuration | ❌ NO                  |
+| `.env.example`    | Template with documentation     | ✅ YES                 |
+| `.env.production` | Production template             | ✅ YES (template only) |
+
+📖 **Complete Configuration Guide:** See [Environment Setup Documentation](docs/ENVIRONMENT-SETUP.md)
 
 ### Environment-Specific Profiles
 
