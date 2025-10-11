@@ -57,24 +57,27 @@ public class HelloWorldIntegrationTest {
 
     @Test
     public void testPingEndpoint() {
-        // Test the /ping endpoint - it's currently secured so we expect 403 Forbidden
+        // Test the /api/v1/check/ping endpoint - it's publicly accessible
         ResponseEntity<String> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/ping",
+                "http://localhost:" + port + "/api/v1/check/ping",
                 String.class);
 
-        // Since the endpoint is secured, we expect a 403 Forbidden response
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        // The endpoint is permitted, we expect 200 OK
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo("pong");
     }
 
     @Test
     public void testHealthEndpoint() {
-        // Test the /health endpoint - it's currently secured so we expect 403 Forbidden
+        // Test the /api/v1/check/health endpoint - it's publicly accessible
         ResponseEntity<String> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/health",
+                "http://localhost:" + port + "/api/v1/check/health",
                 String.class);
 
-        // Since the endpoint is secured, we expect a 403 Forbidden response
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        // The endpoint is permitted, we expect 200 OK
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("\"status\":\"UP\"");
+        assertThat(response.getBody()).contains("\"service\":\"exploresg-auth-service\"");
     }
 
     @Test
@@ -103,13 +106,14 @@ public class HelloWorldIntegrationTest {
 
     @Test
     public void testActuatorHealthEndpoint() {
-        // Test Spring Boot Actuator health endpoint - currently secured
+        // Test Spring Boot Actuator health endpoint - it's publicly accessible
         ResponseEntity<String> response = restTemplate.getForEntity(
                 "http://localhost:" + port + "/actuator/health",
                 String.class);
 
-        // Since the endpoint is secured, we expect a 403 Forbidden response
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        // The endpoint is permitted, we expect 200 OK
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("\"status\":\"UP\"");
     }
 
     @Test
