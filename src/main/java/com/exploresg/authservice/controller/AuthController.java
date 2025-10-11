@@ -7,6 +7,7 @@ import com.exploresg.authservice.model.UserProfile;
 import com.exploresg.authservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -43,7 +45,12 @@ public class AuthController {
             @AuthenticationPrincipal User user, // <-- FIX: Correctly expects a 'User' object
             @Valid @RequestBody SignupProfileRequest request) {
 
+        log.info("User signup/profile update initiated for userId: {}, email: {}",
+                user.getId(), user.getEmail());
+
         UserProfile profile = userService.createOrUpdateProfile(user.getId(), request);
+
+        log.info("User profile successfully created/updated for userId: {}", user.getId());
 
         SignupResponse response = new SignupResponse(
                 user.getId(),
@@ -64,13 +71,17 @@ public class AuthController {
     // Role-protected endpoints
     @GetMapping("/admin/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> getAdminDashboard() {
+    public ResponseEntity<String> getAdminDashboard(@AuthenticationPrincipal User user) {
+        log.info("Admin dashboard accessed by userId: {}, email: {}",
+                user.getId(), user.getEmail());
         return ResponseEntity.ok("Welcome to the Admin Dashboard!");
     }
 
     @GetMapping("/fleet/vehicles")
     @PreAuthorize("hasAnyRole('FLEET_MANAGER', 'ADMIN')")
-    public ResponseEntity<String> getFleetVehicles() {
+    public ResponseEntity<String> getFleetVehicles(@AuthenticationPrincipal User user) {
+        log.info("Fleet vehicles accessed by userId: {}, role: {}",
+                user.getId(), user.getRole());
         return ResponseEntity.ok("Here is the list of fleet vehicles.");
     }
 }
