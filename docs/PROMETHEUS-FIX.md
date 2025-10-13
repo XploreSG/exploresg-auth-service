@@ -203,11 +203,13 @@ process_uptime_seconds
 ### Still Getting 500 Error
 
 1. **Check logs**:
+
    ```bash
    kubectl logs -n exploresg exploresg-auth-service-xxxxx
    ```
 
 2. **Verify dependency is included**:
+
    ```bash
    # Check if micrometer-registry-prometheus is in the jar
    unzip -l target/auth-service-0.0.1-SNAPSHOT.jar | grep micrometer-registry-prometheus
