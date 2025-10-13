@@ -43,6 +43,18 @@ services:
     ports:
       - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     restart: on-failure
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:${SERVER_PORT:-8080}/actuator/health/liveness",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     # --- ADD THIS SECTION ---
     # Connects the service to two networks:
     # 1. The 'default' network to talk to its own DB.

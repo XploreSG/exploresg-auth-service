@@ -75,21 +75,34 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
+          # Startup Probe - Protects slow-starting containers
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30 # 30 * 10s = 5 minutes max startup time
+
+          # Liveness Probe - Restarts pod if failing
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 60
+            initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+
+          # Readiness Probe - Removes from service if not ready
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
             failureThreshold: 3
       restartPolicy: Always
 
