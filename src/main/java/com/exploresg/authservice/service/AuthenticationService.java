@@ -38,7 +38,9 @@ public class AuthenticationService {
                     .familyName(user.getFamilyName())
                     .picture(user.getPicture())
                     .phone(userProfile != null ? userProfile.getPhone() : null)
-                    .dateOfBirth(userProfile != null ? userProfile.getDateOfBirth().toString() : null)
+                    .dateOfBirth(userProfile != null && userProfile.getDateOfBirth() != null
+                            ? userProfile.getDateOfBirth().toString()
+                            : null)
                     .drivingLicenseNumber(userProfile != null ? userProfile.getDrivingLicenseNumber() : null)
                     .passportNumber(userProfile != null ? userProfile.getPassportNumber() : null)
                     .preferredLanguage(userProfile != null ? userProfile.getPreferredLanguage() : null)

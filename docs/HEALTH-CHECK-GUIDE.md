@@ -166,6 +166,37 @@ curl http://localhost:8080/api/v1/check/ping
 curl http://localhost:8080/api/v1/check/hello
 ```
 
+### Quick script runner
+
+You can run a simple script that checks the major endpoints with retries and clear pass/fail output:
+
+```bash
+# Windows (PowerShell)
+./run-health-checks.bat
+
+# macOS/Linux
+chmod +x ./run-health-checks.sh
+./run-health-checks.sh
+```
+
+Optional environment variables:
+
+```bash
+# Customize base URL and behavior
+BASE_URL=http://localhost:8080 \
+RETRIES=60 \
+DELAY_SECONDS=1 \
+TIMEOUT_SECONDS=5 \
+INCLUDE_METRICS=true \
+./run-health-checks.sh
+```
+
+On Windows PowerShell, you can also pass parameters directly:
+
+```powershell
+powershell -File .\scripts\test-health.ps1 -BaseUrl http://localhost:8080 -Retries 60 -IncludeMetrics
+```
+
 ### Docker Container
 
 ```bash

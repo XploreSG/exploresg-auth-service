@@ -1,7 +1,5 @@
 package com.exploresg.authservice.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,13 +13,10 @@ public class SignupProfileRequest {
     private String givenName;
     private String familyName;
 
-    @NotBlank(message = "Phone number is required")
+    // Profile fields - optional at signup, can be collected later (e.g., before
+    // booking)
     private String phone;
-
-    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
-
-    @NotBlank(message = "Driving license number is required")
     private String drivingLicenseNumber;
 
     private String passportNumber;
