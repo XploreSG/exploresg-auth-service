@@ -1,3 +1,15 @@
+# LOGGING-IMPLEMENTATION-SUMMARY.md — moved to observability
+
+This file has been consolidated into `docs/observability.md` as part of a documentation cleanup on 2025-10-15.
+
+The original content was archived to:
+
+`docs/archive/2025-10-15/LOGGING-IMPLEMENTATION-SUMMARY.md`
+
+Please see `docs/observability.md` for the combined logging, metrics, tracing, and testing guidance.
+
+If you need the original full text, retrieve it from the archive path above.
+
 # ✅ Logging Implementation - Complete Summary
 
 ## 🎉 Status: PRODUCTION LOGGING READY
@@ -269,11 +281,11 @@ fields @timestamp, requestPath, message
 
 ## 📚 Documentation Links
 
-| Document                                                         | Purpose                   |
-| ---------------------------------------------------------------- | ------------------------- |
-| [LOGGING-GUIDE.md](LOGGING-GUIDE.md)                             | Complete 400+ line guide  |
-| [LOGGING-QUICK-REFERENCE.md](LOGGING-QUICK-REFERENCE.md)         | Quick start reference     |
-| [PRODUCTION-READINESS-REVIEW.md](PRODUCTION-READINESS-REVIEW.md) | Overall production review |
+| Document                                                         | Purpose                          |
+| ---------------------------------------------------------------- | -------------------------------- |
+| [observability.md](observability.md)                             | Consolidated observability guide |
+| [observability.md](observability.md)                             | Quick start & testing reference  |
+| [PRODUCTION-READINESS-REVIEW.md](PRODUCTION-READINESS-REVIEW.md) | Overall production review        |
 
 ---
 
@@ -295,7 +307,7 @@ A: Adjust log levels in `application-prod.properties`
 
 ### Getting Help
 
-1. Check [LOGGING-GUIDE.md](LOGGING-GUIDE.md) troubleshooting section
+1. Check [observability.md](observability.md) troubleshooting section
 2. Review `logback-spring.xml` configuration
 3. Enable DEBUG logging temporarily
 4. Check application startup logs
@@ -332,4 +344,4 @@ Your ExploreSG Auth Service now has:
 **Status:** ✅ **PRODUCTION READY FOR LOGGING**  
 **Next Review Date:** After production deployment
 
-**Questions?** See [LOGGING-GUIDE.md](LOGGING-GUIDE.md) or contact your DevOps team.
+**Questions?** See [observability.md](observability.md) or contact your DevOps team.
