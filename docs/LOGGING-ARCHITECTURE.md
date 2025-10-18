@@ -234,8 +234,17 @@ Request Complete → MDC.clear()
                       ▼
         ┌─────────────────────────────┐
         │  AWS CloudWatch Logs         │
-        │                              │
-        │  Log Group:                  │
+# LOGGING-ARCHITECTURE.md — moved to observability
+
+This file has been consolidated into `docs/observability.md` as part of a documentation cleanup on 2025-10-15.
+
+The original content was archived to:
+
+`docs/archive/2025-10-15/LOGGING-ARCHITECTURE.md`
+
+Please see `docs/observability.md` for the combined logging, metrics, tracing, and testing guidance.
+
+If you need the original full text, retrieve it from the archive path above.
         │  /aws/eks/exploresg/auth     │
         │                              │
         │  Log Stream: pod-name-id     │
@@ -349,4 +358,4 @@ All logs include:
 
 **This diagram shows how every component works together to provide comprehensive logging and observability.**
 
-See [LOGGING-GUIDE.md](LOGGING-GUIDE.md) for detailed implementation guide.
+See [observability.md](observability.md) for the consolidated implementation guide.
