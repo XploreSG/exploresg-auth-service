@@ -34,7 +34,7 @@ spec:
       containers:
         - name: auth-service
           image: your-registry/exploresg-auth-service:latest
-          
+
           # ADD THIS SECTION
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -46,24 +46,24 @@ spec:
                 -XX:+ExitOnOutOfMemoryError
                 -XX:+HeapDumpOnOutOfMemoryError
                 -XX:HeapDumpPath=/tmp/heapdump.hprof
-            
+
             # Keep existing env vars from ConfigMap/Secret
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://..."
-          
+
           envFrom:
             - configMapRef:
                 name: auth-service-config
             - secretRef:
                 name: auth-service-secrets
-          
+
           # UPDATE MEMORY LIMITS
           resources:
             requests:
               memory: "512Mi"
               cpu: "250m"
             limits:
-              memory: "768Mi"  # ⬅️ CHANGED from 1Gi
+              memory: "768Mi" # ⬅️ CHANGED from 1Gi
               cpu: "500m"
 ```
 
@@ -88,7 +88,7 @@ data:
   SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
   LOGGING_LEVEL_ROOT: "INFO"
   LOGGING_LEVEL_COM_EXPLORESG: "INFO"
-  
+
   # ADD THESE NEW ENTRIES ⬇️
   SPRING_JPA_PROPERTIES_HIBERNATE_QUERY_PLAN_CACHE_MAX_SIZE: "128"
   SPRING_JPA_PROPERTIES_HIBERNATE_QUERY_PLAN_CACHE_PARAMETER_METADATA_MAX_SIZE: "64"
@@ -98,12 +98,12 @@ data:
 
 ## 📊 Change Summary
 
-| Configuration | Old Value | New Value | Reason |
-|---------------|-----------|-----------|--------|
-| **Memory Limit** | 1Gi | **768Mi** | More realistic limit, prevents waste |
-| **JVM Max Heap** | 75% (default) | **70%** | Better container awareness |
-| **GC Algorithm** | Default | **G1GC** | Better for microservices |
-| **Query Cache** | Unbounded | **128 queries** | Prevent memory leaks |
+| Configuration    | Old Value     | New Value       | Reason                               |
+| ---------------- | ------------- | --------------- | ------------------------------------ |
+| **Memory Limit** | 1Gi           | **768Mi**       | More realistic limit, prevents waste |
+| **JVM Max Heap** | 75% (default) | **70%**         | Better container awareness           |
+| **GC Algorithm** | Default       | **G1GC**        | Better for microservices             |
+| **Query Cache**  | Unbounded     | **128 queries** | Prevent memory leaks                 |
 
 ---
 
@@ -183,13 +183,13 @@ deployment:
         -XX:+ExitOnOutOfMemoryError
         -XX:+HeapDumpOnOutOfMemoryError
         -XX:HeapDumpPath=/tmp/heapdump.hprof
-  
+
   resources:
     requests:
       memory: "512Mi"
       cpu: "250m"
     limits:
-      memory: "768Mi"  # Changed from 1Gi
+      memory: "768Mi" # Changed from 1Gi
       cpu: "500m"
 
 configMap:
@@ -254,7 +254,7 @@ kubectl logs -n exploresg <pod-name> --tail=100 | grep -i "error\|exception\|oom
 
 ```promql
 # Memory utilization (should be 50-70%)
-(container_memory_working_set_bytes{pod=~"exploresg-auth-service.*"} 
+(container_memory_working_set_bytes{pod=~"exploresg-auth-service.*"}
   / container_spec_memory_limit_bytes{pod=~"exploresg-auth-service.*"}) * 100
 
 # Heap usage (should stabilize around 300-400MB)
@@ -294,18 +294,21 @@ kubectl rollout status deployment/exploresg-auth-service -n exploresg
 ## 🎯 Expected Outcomes
 
 ### Before (Current State)
+
 - Memory limit: 1Gi
 - Typical usage: 400-600MB
 - Utilization: 40-60%
 - GC pause: ~250ms
 
 ### After (Optimized State)
+
 - Memory limit: 768Mi
 - Typical usage: 300-400MB
 - Utilization: 40-55%
 - GC pause: ~180ms
 
 ### Benefits
+
 - ✅ **25% reduction** in memory allocation
 - ✅ **30% reduction** in peak memory usage
 - ✅ **28% improvement** in GC pause times
@@ -325,6 +328,7 @@ kubectl rollout status deployment/exploresg-auth-service -n exploresg
 ### Common Issues
 
 **Issue:** Pod won't start after changes
+
 ```bash
 # Check events
 kubectl describe pod -n exploresg <pod-name>
@@ -335,6 +339,7 @@ kubectl describe pod -n exploresg <pod-name>
 ```
 
 **Issue:** Higher memory usage than expected
+
 ```bash
 # Get heap dump
 kubectl exec -n exploresg <pod-name> -- jcmd 1 GC.heap_dump /tmp/heap.hprof
@@ -344,6 +349,7 @@ kubectl cp exploresg/<pod-name>:/tmp/heap.hprof ./heap.hprof
 ```
 
 **Issue:** Frequent OOM kills
+
 ```bash
 # Check if JVM flags are applied
 kubectl exec -n exploresg <pod-name> -- java -XX:+PrintFlagsFinal -version | grep MaxRAMPercentage
