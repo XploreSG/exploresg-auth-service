@@ -25,6 +25,15 @@
 
     <!-- JSON structured logging for staging and production (ELK/CloudWatch ready) -->
     <springProfile name="staging,prod">
+        <!-- Async appender wrapper for better performance and memory management -->
+        <appender name="ASYNC_JSON_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <queueSize>512</queueSize>
+            <discardingThreshold>0</discardingThreshold>
+            <neverBlock>false</neverBlock>
+            <maxFlushTime>5000</maxFlushTime>
+        </appender>
+        
         <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <!-- Add standard fields -->
@@ -70,6 +79,14 @@
             </encoder>
         </appender>
 
+        <!-- Async file appender for production (rotated daily) -->
+        <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="FILE"/>
+            <queueSize>256</queueSize>
+            <discardingThreshold>0</discardingThreshold>
+            <neverBlock>false</neverBlock>
+        </appender>
+        
         <!-- File appender for production (rotated daily) -->
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_PATH}/${APP_NAME}.log</file>
@@ -83,6 +100,14 @@
             </rollingPolicy>
         </appender>
 
+        <!-- Async error file appender (separate file for errors) -->
+        <appender name="ASYNC_ERROR_FILE" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="ERROR_FILE"/>
+            <queueSize>128</queueSize>
+            <discardingThreshold>0</discardingThreshold>
+            <neverBlock>false</neverBlock>
+        </appender>
+        
         <!-- Error file appender (separate file for errors) -->
         <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_PATH}/${APP_NAME}-error.log</file>
@@ -100,9 +125,9 @@
         </appender>
 
         <root level="INFO">
-            <appender-ref ref="JSON_CONSOLE"/>
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="ERROR_FILE"/>
+            <appender-ref ref="ASYNC_JSON_CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERROR_FILE"/>
         </root>
         
         <!-- Application-specific logging -->
