@@ -133,6 +133,8 @@ A production-ready, secure authentication and authorization microservice built f
 
 ### Cloud Deployment
 
+> **Note:** This service uses a **centralized infrastructure repository** for Kubernetes manifests and deployment configurations. The application repository contains only the application code and Docker configuration.
+
 This service is production-ready and can be deployed to:
 
 | Provider                   | Documentation                                                         |
@@ -140,7 +142,7 @@ This service is production-ready and can be deployed to:
 | **AWS** (ECS/Fargate)      | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#aws-deployment)   |
 | **Azure** (App Service)    | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#azure-deployment) |
 | **GCP** (Cloud Run)        | [Environment Setup Guide](docs/ENVIRONMENT-SETUP.md#gcp-deployment)   |
-| **Kubernetes**             | See `kubernetes/` directory                                           |
+| **Kubernetes**             | Managed in central infrastructure repository                          |
 | **CI/CD** (GitHub Actions) | See `.github/workflows/` directory                                    |
 
 📖 **Quick Links:**
@@ -148,6 +150,7 @@ This service is production-ready and can be deployed to:
 - [🚀 Deployment Guide](README-DEPLOYMENT.md) - Step-by-step deployment instructions
 - [⚙️ Environment Setup](docs/ENVIRONMENT-SETUP.md) - Comprehensive configuration guide
 - [🔐 Security Best Practices](docs/ENVIRONMENT-SETUP.md#security-best-practices) - Production security checklist
+- [☸️ Kubernetes Config Changes](docs/KUBERNETES-CONFIG-CHANGES.md) - Required changes for infra repository
 
 ### Local Development Setup
 
