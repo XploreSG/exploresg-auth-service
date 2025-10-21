@@ -53,6 +53,8 @@ public class SecurityConfig {
                                                                 "/error",
                                                                 "/api/v1/check/**",
                                                                 "/api/v1/auth/**",
+                                                                "/api/v1/test/**", // ! TODO: Test endpoints for
+                                                                                   // development
                                                                 "/actuator/health",
                                                                 "/actuator/health/liveness",
                                                                 "/actuator/health/readiness",

@@ -28,6 +28,7 @@ A production-ready, secure authentication and authorization microservice built f
 | **Role-Based Access Control** | Supports multiple roles (USER, ADMIN, FLEET_MANAGER, SUPPORT, MANAGER)    |
 | **User Profile Management**   | Complete profile system with personal details, documents, and preferences |
 | **Token Exchange Flow**       | Trades Google ID tokens for custom application JWTs                       |
+| **RabbitMQ Integration**      | Event-driven notifications via RabbitMQ for user creation events          |
 | **Database Integration**      | PostgreSQL with Spring Data JPA and Hibernate                             |
 | **Comprehensive Testing**     | Unit, integration, and security tests with JaCoCo coverage                |
 | **CI/CD Ready**               | GitHub Actions workflows for automated testing and deployment             |
@@ -40,6 +41,7 @@ A production-ready, secure authentication and authorization microservice built f
 | ------------------------ | ------------------------------------------------------------ |
 | **Language & Framework** | Java 17, Spring Boot 3.5.6                                   |
 | **Security**             | Spring Security 6, OAuth2 Resource Server, JWT (jjwt 0.11.5) |
+| **Messaging**            | RabbitMQ, Spring AMQP                                        |
 | **Database**             | PostgreSQL 15, H2 (testing), Spring Data JPA, Hibernate      |
 | **Build & Dependencies** | Maven 3.9.11, Lombok                                         |
 | **Testing**              | JUnit 5, Spring Boot Test, JaCoCo, Failsafe                  |

@@ -22,6 +22,7 @@ import java.util.Objects;
 public class UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final UserEventPublisher userEventPublisher;
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
@@ -74,7 +75,7 @@ public class UserService {
                 .orElseGet(() -> {
                     // Role is only set on first creation
                     Role finalRole = (requestedRole != null) ? requestedRole : Role.USER;
-                    return userRepository.save(
+                    User newUser = userRepository.save(
                             User.builder()
                                     .email(email)
                                     .name(name)
@@ -88,6 +89,11 @@ public class UserService {
                                     .createdAt(now)
                                     .updatedAt(now)
                                     .build());
+
+                    // Publish event for new user creation
+                    userEventPublisher.publishUserCreatedEvent(newUser);
+
+                    return newUser;
                 });
     }
 
