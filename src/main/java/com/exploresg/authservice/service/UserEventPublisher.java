@@ -39,53 +39,29 @@ public class UserEventPublisher {
     @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 2000), retryFor = { Exception.class })
     public void publishUserCreatedEvent(User user) {
         try {
-            UserCreatedEvent event = UserCreatedEvent.fromUser(user);
+            // Create simplified message with just the essential fields
+            var userCreatedMessage = java.util.Map.of(
+                    "email", user.getEmail(),
+                    "name", user.getName() != null ? user.getName() : user.getGivenName(),
+                    "givenName", user.getGivenName() != null ? user.getGivenName() : "");
 
-            log.info("Publishing UserCreatedEvent for user: {} (userId: {}, email: {})",
-                    user.getName(), user.getId(), user.getEmail());
+            log.info("Publishing UserCreatedEvent for user: {} (email: {})",
+                    userCreatedMessage.get("name"), user.getEmail());
 
+            // Publish to exchange with empty routing key (as expected by notification
+            // service)
             rabbitTemplate.convertAndSend(
                     userEventsExchange,
-                    userCreatedRoutingKey,
-                    event);
+                    "", // Empty routing key for fanout-style delivery
+                    userCreatedMessage);
 
-            log.info("Successfully published UserCreatedEvent for userId: {}", user.getId());
-
-            // Also send welcome email notification to notification service
-            sendWelcomeEmailNotification(user);
-
+            log.info("✅ Successfully published UserCreatedEvent to exchange '{}' for: {}",
+                    userEventsExchange, user.getEmail());
         } catch (Exception e) {
             // Log the error but don't fail the user creation process
-            log.error("Failed to publish UserCreatedEvent for userId: {}. Error: {}",
-                    user.getId(), e.getMessage(), e);
+            log.error("Failed to publish UserCreatedEvent for user: {}. Error: {}",
+                    user.getEmail(), e.getMessage(), e);
         }
     }
 
-    /**
-     * Sends welcome email notification directly to notification service's queue.
-     * Uses the format expected by the notification service (Spring Cloud Stream).
-     */
-    private void sendWelcomeEmailNotification(User user) {
-        try {
-            // Create notification in the format expected by notification service
-            var notification = java.util.Map.of(
-                    "recipientEmail", user.getEmail(),
-                    "recipientName", user.getName() != null ? user.getName() : user.getGivenName(),
-                    "emailType", "WELCOME",
-                    "templateData", java.util.Map.of(
-                            "userName", user.getName() != null ? user.getName() : user.getGivenName()));
-
-            // Send directly to notification service's queue (no exchange/routing needed for
-            // Spring Cloud Stream)
-            rabbitTemplate.convertAndSend(
-                    "sendNotification-in-0", // Notification service's input queue
-                    notification);
-
-            log.info("✉️ Welcome email notification sent to notification service for: {}", user.getEmail());
-
-        } catch (Exception e) {
-            log.error("Failed to send welcome email notification for userId: {}. Error: {}",
-                    user.getId(), e.getMessage(), e);
-        }
-    }
 }
